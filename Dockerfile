@@ -47,8 +47,6 @@ RUN mkdir -p /root/.ssh && \
     chmod 644 /root/.ssh/config && \
     mkdir /run/sshd
 
-COPY overrides /opt/overrides
-
 # checkout a specific commit for repeatability, tip of main as of 2023-07-10
 RUN cd "$UNO_HOME"/.. && \
     git clone https://github.com/apache/fluo-uno.git && \
