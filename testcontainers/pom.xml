@@ -25,7 +25,7 @@
 
         <jdk.version>11</jdk.version>
 
-        <geomesa.version>5.0.0-SNAPSHOT</geomesa.version>
+        <geomesa.version>4.0.5</geomesa.version>
         <accumulo.version>2.1.2</accumulo.version>
         <testcontainers.version>1.19.3</testcontainers.version>
         <slf4j.version>1.7.36</slf4j.version>
