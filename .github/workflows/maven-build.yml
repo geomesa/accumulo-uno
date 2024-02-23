@@ -24,7 +24,7 @@ jobs:
           java-version: '11'
           cache: 'maven'
       - name: Build with Maven
-        run: mvn clean install $MAVEN_CLI_OPTS
+        run: cd testcontainers && mvn clean install $MAVEN_CLI_OPTS
       - name: Remove geomesa artifacts
         if: success() || failure()
         run: rm -rf ~/.m2/repository/org/geomesa
