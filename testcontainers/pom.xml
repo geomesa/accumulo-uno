@@ -139,6 +139,12 @@
             <artifactId>geomesa-accumulo-distributed-runtime_2.12</artifactId>
             <version>${geomesa.version}</version>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- test dependencies -->

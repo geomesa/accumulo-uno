@@ -7,14 +7,13 @@ import org.apache.accumulo.core.client.security.tokens.PasswordToken;
 import org.apache.accumulo.core.conf.ClientProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.OutputFrame;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.utility.DockerImageName;
-import org.testcontainers.utility.MountableFile;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.URI;
@@ -51,12 +50,14 @@ public class AccumuloContainer
     }
 
     public AccumuloContainer withGeoMesaDistributedRuntime() {
-        return withGeoMesaDistributedRuntime(MountableFile.forHostPath(findDistributedRuntime()));
+        return withGeoMesaDistributedRuntime(findDistributedRuntime());
     }
 
-    public AccumuloContainer withGeoMesaDistributedRuntime(MountableFile jar) {
-        return withCopyFileToContainer(jar,
-                                       "/opt/fluo-uno/install/accumulo/lib/geomesa-accumulo-distributed-runtime.jar");
+    public AccumuloContainer withGeoMesaDistributedRuntime(String jarHostPath) {
+        logger.info("Binding to host path " + jarHostPath);
+        return withFileSystemBind(jarHostPath,
+                                  "/opt/fluo-uno/install/accumulo/lib/geomesa-accumulo-distributed-runtime.jar",
+                                  BindMode.READ_ONLY);
     }
 
     public AccumuloClient client() {
