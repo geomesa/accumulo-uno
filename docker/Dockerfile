@@ -33,8 +33,8 @@ ENV TSERVER_PORT=9997
 
 RUN apt-get update && apt-get install -y \
     openssh-server \
-    git \
-    maven \
+    unzip \
+    perl \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /root/.ssh && \
@@ -49,14 +49,23 @@ RUN mkdir -p /root/.ssh && \
 
 # checkout a specific commit for repeatability, tip of main as of 2023-07-10
 RUN cd "$UNO_HOME"/.. && \
-    git clone https://github.com/apache/fluo-uno.git && \
+    curl -L "https://github.com/apache/fluo-uno/archive/$UNO_COMMIT.zip" -o fluo-uno.zip && \
+    unzip fluo-uno.zip && \
+    ln -s "fluo-uno-$UNO_COMMIT" fluo-uno && \
     cd fluo-uno && \
-    git checkout $UNO_COMMIT && \
+    # this line removes the check for maven, which is only needed if you're building modules against source code
+    sed -i '/hash mvn/d' bin/impl/commands.sh && \
     ./bin/uno fetch accumulo && \
     UNO_HOST=REPLACE_HOST ./bin/uno install accumulo && \
     ln -s "$UNO_HOME"/install/hadoop-* "$UNO_HOME"/install/hadoop && \
     ln -s "$UNO_HOME"/install/accumulo-* "$UNO_HOME"/install/accumulo && \
-    ln -s "$UNO_HOME"/install/apache-zookeeper-* "$UNO_HOME"/install/zookeeper
+    ln -s "$UNO_HOME"/install/apache-zookeeper-* "$UNO_HOME"/install/zookeeper && \
+    # clean up downloaded artifacts to reduce image size
+    rm ../fluo-uno.zip && \
+    rm downloads/* && \
+    # remove some extra hadoop files that don't seem to be needed but take up a lot of disk
+    rm -r install/hadoop/share/doc/ && \
+    rm -r install/hadoop/share/hadoop/tools/lib/
 
 COPY --chmod=777 start.sh /opt/start.sh
 

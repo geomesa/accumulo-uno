@@ -3,7 +3,8 @@
 # exit on command error
 set -e
 
-IPADDR="$(hostname -I | awk '{ print $1 }')"
+UNO_HOME="${UNO_HOME:-/opt/fluo-uno}"
+UNO_HOST="${UNO_HOST:-$(hostname -I | awk '{ print $1 }')}" # use IP address if not specified
 
 if ! pgrep -x sshd &>/dev/null; then
   /usr/sbin/sshd
@@ -27,12 +28,12 @@ done
 (
 ssh-keyscan localhost        || :
 ssh-keyscan 0.0.0.0          || :
-ssh-keyscan "$IPADDR"        || :
+ssh-keyscan "$UNO_HOST"      || :
 ssh-keyscan "$(hostname -f)" || :
 ) 2>/dev/null >> /root/.ssh/known_hosts
 
-echo "Setting host to $IPADDR"
-grep -rl REPLACE_HOST "$UNO_HOME"/install/ | xargs sed -i "s/REPLACE_HOST/$IPADDR/g"
+echo "Setting host to $UNO_HOST"
+grep -rl REPLACE_HOST "$UNO_HOME"/install/ | xargs sed -i "s/REPLACE_HOST/$UNO_HOST/g"
 
 ZK_PORT=${ZOOKEEPER_PORT:-2181}
 if [[ $ZK_PORT != "2181" ]]; then
