@@ -20,6 +20,7 @@ ARG UNO_COMMIT=55dffa1017f2586fd0ab5468bded37bb1dd17d26
 ARG ACCUMULO_VERSION=2.1.2
 
 ENV UNO_HOME=/opt/fluo-uno
+ENV UNO_COMMAND=run
 ENV ACCUMULO_VERSION=${ACCUMULO_VERSION}
 ENV ACCUMULO_USE_NATIVE_MAP=true
 ENV HDFS_NAMENODE_USER=root
@@ -70,6 +71,8 @@ RUN cd "$UNO_HOME"/.. && \
 COPY --chmod=777 start.sh /opt/start.sh
 
 ENTRYPOINT [ "/opt/start.sh" ]
+
+WORKDIR $UNO_HOME
 
 RUN apt-get update && apt-get upgrade -y \
     && rm -rf /var/lib/apt/lists/*

@@ -5,6 +5,7 @@ set -e
 
 UNO_HOME="${UNO_HOME:-/opt/fluo-uno}"
 UNO_HOST="${UNO_HOST:-$(hostname -I | awk '{ print $1 }')}" # use IP address if not specified
+UNO_COMMAND="${UNO_COMMAND:-run}"
 
 if ! pgrep -x sshd &>/dev/null; then
   /usr/sbin/sshd
@@ -52,7 +53,7 @@ fi
 
 # shellcheck disable=SC1090
 source <("$UNO_HOME"/bin/uno env)
-"$UNO_HOME"/bin/uno run accumulo
+"$UNO_HOME"/bin/uno "$UNO_COMMAND" accumulo
 
 # handle stopping on kill signal
 _stop() {
