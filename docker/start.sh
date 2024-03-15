@@ -6,6 +6,7 @@ set -e
 UNO_HOME="${UNO_HOME:-/opt/fluo-uno}"
 UNO_HOST="${UNO_HOST:-$(hostname -I | awk '{ print $1 }')}" # use IP address if not specified
 UNO_COMMAND="${UNO_COMMAND:-run}"
+UNO_GRACEFUL_STOP="${UNO_GRACEFUL_STOP:-}"
 
 if ! pgrep -x sshd &>/dev/null; then
   /usr/sbin/sshd
@@ -57,8 +58,12 @@ source <("$UNO_HOME"/bin/uno env)
 
 # handle stopping on kill signal
 _stop() {
-  kill "$child" 2>/dev/null
   echo "Shutting down..."
+  if [[ -n "$UNO_GRACEFUL_STOP" ]]; then
+    "$UNO_HOME"/bin/uno stop accumulo
+  else
+    kill "$child" 2>/dev/null
+  fi
 }
 
 trap _stop TERM INT

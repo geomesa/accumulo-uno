@@ -106,6 +106,12 @@ Most functionality should work with the following ports exposed:
 
 See the Accumulo [docs](https://accumulo.apache.org/docs/2.x/administration/in-depth-install#network) for a full list of ports.
 
+## Persistence
+
+To persist data between runs, mount a persistent volume at `/opt/fluo-uno/install/data`. To prevent data loss
+and recovery on startup, set `UNO_GRACEFUL_STOP` to `true`. When starting the docker with an existing volume,
+set `UNO_COMMAND` to `start`. 
+
 ## Configuration
 
 The following environment variables are supported at runtime:
@@ -113,3 +119,5 @@ The following environment variables are supported at runtime:
 * `ZOOKEEPER_PORT` - override the default Zookeeper port
 * `TSERVER_PORT` - override the default tablet server port
 * `UNO_HOST` - bind the Accumulo processes to the specified host
+* `UNO_COMMAND` - the command used to run fluo-uno, default `run`
+* `UNO_GRACEFUL_STOP` - enable a graceful shutdown to prevent data loss
