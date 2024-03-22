@@ -5,6 +5,7 @@ set -e
 
 UNO_HOME="${UNO_HOME:-/opt/fluo-uno}"
 UNO_HOST="${UNO_HOST:-$(hostname -I | awk '{ print $1 }')}" # use IP address if not specified
+UNO_SERVICE="${UNO_SERVICE:-accumulo}"
 UNO_COMMAND="${UNO_COMMAND:-run}"
 UNO_GRACEFUL_STOP="${UNO_GRACEFUL_STOP:-}"
 
@@ -52,21 +53,32 @@ if [[ $TSERVER_PORT != "9997" ]]; then
   echo -e "\ntserver.port.client=${TSERVER_PORT}" >> "$UNO_HOME"/install/accumulo/conf/accumulo.properties
 fi
 
+# make everything in hdfs world-writable for easier development
+sed -i '/<\/configuration>/d' "$UNO_HOME"/install/hadoop/etc/hadoop/hdfs-site.xml
+{
+  echo "  <property>"
+  echo "    <name>dfs.permissions.enabled</name>"
+  echo "    <value>false</value>"
+  echo "  </property>"
+  echo "</configuration>"
+  echo ""
+} >> "$UNO_HOME"/install/hadoop/etc/hadoop/hdfs-site.xml
+
 # shellcheck disable=SC1090
 source <("$UNO_HOME"/bin/uno env)
-"$UNO_HOME"/bin/uno "$UNO_COMMAND" accumulo
+"$UNO_HOME"/bin/uno "$UNO_COMMAND" "$UNO_SERVICE"
 
 # handle stopping on kill signal
 _stop() {
   echo "Shutting down..."
   if [[ -n "$UNO_GRACEFUL_STOP" ]]; then
-    "$UNO_HOME"/bin/uno stop accumulo
+    "$UNO_HOME"/bin/uno stop "$UNO_SERVICE"
   else
     kill "$child" 2>/dev/null
   fi
 }
 
 trap _stop TERM INT
-tail -f /dev/null "$UNO_HOME"/install/logs/accumulo/* &
+tail -f /dev/null "$UNO_HOME"/install/logs/"$UNO_SERVICE"/* &
 child=$!
 wait "$child"
