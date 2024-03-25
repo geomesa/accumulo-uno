@@ -31,7 +31,7 @@ public class AccumuloContainer
     private final String instanceName = "uno";
     private final String username = "root";
     private final String password = "secret";
-    private final int zookeeperPort;
+    private final int zookeeperPort = getFreePort();
 
     public AccumuloContainer() {
         this(DockerImageName.parse("ghcr.io/geomesa/accumulo-uno").withTag("2.1"));
@@ -39,7 +39,6 @@ public class AccumuloContainer
 
     public AccumuloContainer(DockerImageName imageName) {
         super(imageName);
-        zookeeperPort = getFreePort();
         int tserverPort = getFreePort();
         addFixedExposedPort(zookeeperPort, zookeeperPort);
         addFixedExposedPort(tserverPort, tserverPort);
