@@ -4,7 +4,7 @@
 set -e
 
 UNO_HOME="${UNO_HOME:-/opt/fluo-uno}"
-UNO_HOST="${UNO_HOST:-$(hostname -I | awk '{ print $1 }')}" # use IP address if not specified
+UNO_HOST="${UNO_HOST:-$(hostname -s)}" # use hostname if not specified
 UNO_SERVICE="${UNO_SERVICE:-accumulo}"
 UNO_COMMAND="${UNO_COMMAND:-run}"
 UNO_GRACEFUL_STOP="${UNO_GRACEFUL_STOP:-}"
@@ -46,6 +46,11 @@ fi
 if [[ -n "$TSERVER_PORT" ]] && [[ $TSERVER_PORT != "9997" ]]; then
   echo "Setting tserver.port.client to $TSERVER_PORT"
   echo -e "\ntserver.port.client=${TSERVER_PORT}" >> "$UNO_HOME"/install/accumulo/conf/accumulo.properties
+fi
+
+if [[ -n "$MANAGER_PORT" ]] && [[ $MANAGER_PORT != "9999" ]]; then
+  echo "Setting manager.port.client to $MANAGER_PORT"
+  echo -e "\nmanager.port.client=${MANAGER_PORT}" >> "$UNO_HOME"/install/accumulo/conf/accumulo.properties
 fi
 
 # sets a hadoop config value - assumes that the value does not already exist

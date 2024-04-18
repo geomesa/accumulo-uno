@@ -11,10 +11,12 @@ import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.OutputFrame;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import org.testcontainers.utility.DockerImageName;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -22,6 +24,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 
 public class AccumuloContainer
       extends GenericContainer<AccumuloContainer> {
@@ -40,12 +43,44 @@ public class AccumuloContainer
     public AccumuloContainer(DockerImageName imageName) {
         super(imageName);
         int tserverPort = getFreePort();
+        int managerPort = getFreePort();
         addFixedExposedPort(zookeeperPort, zookeeperPort);
         addFixedExposedPort(tserverPort, tserverPort);
+        addFixedExposedPort(managerPort, managerPort);
         addExposedPorts(9995); // accumulo monitor, for debugging
         addEnv("ZOOKEEPER_PORT", Integer.toString(zookeeperPort));
         addEnv("TSERVER_PORT", Integer.toString(tserverPort));
+        addEnv("MANAGER_PORT", Integer.toString(managerPort));
+        // noinspection resource
         withLogConsumer(new AccumuloLogConsumer());
+
+        // to get networking right, we need to make the container use the same hostname as the host -
+        // that way when it returns tserver locations, they will map to localhost and go through the correct port bindings
+        String hostname = null;
+        try {
+            hostname =
+                    Runtime.getRuntime()
+                            .exec("hostname -s")
+                            .onExit()
+                            .thenApply((p) -> {
+                                try (InputStream is = p.getInputStream()) {
+                                    return IOUtils.toString(is, StandardCharsets.UTF_8).trim();
+                                } catch (IOException e) {
+                                    logger.error("Error reading hostname:", e);
+                                    return null;
+                                }
+                            })
+                            .get();
+        } catch (IOException | InterruptedException | ExecutionException e) {
+            logger.error("Error reading hostname:", e);
+        }
+        if (hostname != null) {
+            String finalHostname = hostname;
+            // noinspection resource
+            withCreateContainerCmdModifier((cmd) -> cmd.withHostName(finalHostname));
+            // noinspection resource
+            withNetworkAliases(hostname);
+        }
     }
 
     public AccumuloContainer withGeoMesaDistributedRuntime() {
@@ -53,7 +88,7 @@ public class AccumuloContainer
     }
 
     public AccumuloContainer withGeoMesaDistributedRuntime(String jarHostPath) {
-        logger.info("Binding to host path " + jarHostPath);
+        logger.info("Binding to host path {}", jarHostPath);
         return withFileSystemBind(jarHostPath,
                                   "/opt/fluo-uno/install/accumulo/lib/geomesa-accumulo-distributed-runtime.jar",
                                   BindMode.READ_ONLY);
@@ -105,7 +140,7 @@ public class AccumuloContainer
         try {
             URL url = AccumuloContainer.class.getClassLoader().getResource(DISTRIBUTED_RUNTIME_PROPS);
             URI uri = url == null ? null : url.toURI();
-            logger.debug("Distributed runtime lookup: " + uri);
+            logger.debug("Distributed runtime lookup: {}", uri);
             if (uri != null && uri.toString().endsWith("/target/classes/" + DISTRIBUTED_RUNTIME_PROPS)) {
                 // running through an IDE
                 File targetDir = Paths.get(uri).toFile().getParentFile().getParentFile();

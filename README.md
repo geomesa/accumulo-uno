@@ -2,10 +2,6 @@
 
 This project is a wrapper for [fluo-uno](https://github.com/apache/fluo-uno).
 
-Accumulo, Hadoop and Zookeeper are all configured by IP address when the container is started. As such, they should
-generally be accessible from the host machine (usually using `localhost` through exposed ports) or through a docker
-network (using the docker `host`.)
-
 Note that the container is meant for quick tests, and data may be corrupted or lost on shutdown. If data needs to be
 preserved, `exec` into the running container and run `$UNO_HOME/bin/uno stop accumulo` to perform a graceful shutdown.
 
@@ -14,27 +10,14 @@ preserved, `exec` into the running container and run `$UNO_HOME/bin/uno stop acc
     docker pull ghcr.io/geomesa/accumulo-uno:2.1.2
     docker run --rm \
       -p 2181:2181 -p 9997:9997 -p 9999:9999 \
+      --hostname $(hostname -s) \
       ghcr.io/geomesa/accumulo-uno:2.1.2
+
+Note that the `hostname` must be set to the hostname of the host in order for Accumulo's networking to work.
 
 The Accumulo connection properties are available in the container:
 
     docker cp $(docker ps | grep accumulo-uno | awk '{ print $1 }'):/opt/fluo-uno/install/accumulo/conf/accumulo-client.properties .
-
-### Rootless Docker
-
-When running in rootless Docker, some additional steps are required to enable networking.
-
-First, add an entry to `/etc/hosts` to alias `accumulo.local` to `127.0.0.1`:
-
-    sed -i 's/127\.0\.0\.1.*/\0 accumulo.local/' /etc/hosts
-
-The add the following flags to the `docker run` command:
-
-    docker run --rm \
-      -p 2181:2181 -p 9997:9997 -p 9999:9999 \
-      --hostname accumulo.local \
-      -e UNO_HOST=accumulo.local \
-      ghcr.io/geomesa/accumulo-uno:2.1.2
 
 ### Using the Docker with GeoMesa
 
@@ -45,6 +28,7 @@ JAR is available from [GeoMesa](https://github.com/locationtech/geomesa/releases
     tar -xf accumulo_2.12-4.0.5-bin.tar.gz
     docker run --rm \
       -p 2181:2181 -p 9997:9997 -p 9999:9999 \
+      --hostname $(hostname -s) \
       -v "$(pwd)"/geomesa-accumulo_2.12-4.0.5/dist/accumulo/geomesa-accumulo-distributed-runtime_2.12-4.0.5.jar:/opt/fluo-uno/install/accumulo/lib/geomesa-accumulo-distributed-runtime.jar \
       ghcr.io/geomesa/accumulo-uno:2.1.2
 
@@ -103,6 +87,7 @@ Most functionality should work with the following ports exposed:
 
 * `2181` - Zookeeper
 * `9997` - Accumulo Tablet Server
+* `9999` - Accumulo Manager Server
 
 See the Accumulo [docs](https://accumulo.apache.org/docs/2.x/administration/in-depth-install#network) for a full list of ports.
 
@@ -118,6 +103,7 @@ The following environment variables are supported at runtime:
 
 * `ZOOKEEPER_PORT` - override the default Zookeeper port
 * `TSERVER_PORT` - override the default tablet server port
+* `MANAGER_PORT` - override the default manager client port
 * `UNO_HOST` - bind the Accumulo processes to the specified host
 * `UNO_COMMAND` - the command used to run fluo-uno, default `run`
 * `UNO_GRACEFUL_STOP` - enable a graceful shutdown to prevent data loss
