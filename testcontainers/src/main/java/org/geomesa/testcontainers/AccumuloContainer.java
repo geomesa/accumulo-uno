@@ -8,15 +8,12 @@ import org.apache.accumulo.core.conf.ClientProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.OutputFrame;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
-import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import org.testcontainers.utility.DockerImageName;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -24,10 +21,9 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Properties;
-import java.util.concurrent.ExecutionException;
 
 public class AccumuloContainer
-      extends GenericContainer<AccumuloContainer> {
+      extends UnoContainer<AccumuloContainer> {
 
     private static final Logger logger = LoggerFactory.getLogger(AccumuloContainer.class);
 
@@ -37,7 +33,7 @@ public class AccumuloContainer
     private final int zookeeperPort = getFreePort();
 
     public AccumuloContainer() {
-        this(DockerImageName.parse("ghcr.io/geomesa/accumulo-uno").withTag("2.1"));
+        this(DEFAULT_IMAGE);
     }
 
     public AccumuloContainer(DockerImageName imageName) {
@@ -53,34 +49,6 @@ public class AccumuloContainer
         addEnv("MANAGER_PORT", Integer.toString(managerPort));
         // noinspection resource
         withLogConsumer(new AccumuloLogConsumer());
-
-        // to get networking right, we need to make the container use the same hostname as the host -
-        // that way when it returns tserver locations, they will map to localhost and go through the correct port bindings
-        String hostname = null;
-        try {
-            hostname =
-                    Runtime.getRuntime()
-                            .exec("hostname -s")
-                            .onExit()
-                            .thenApply((p) -> {
-                                try (InputStream is = p.getInputStream()) {
-                                    return IOUtils.toString(is, StandardCharsets.UTF_8).trim();
-                                } catch (IOException e) {
-                                    logger.error("Error reading hostname:", e);
-                                    return null;
-                                }
-                            })
-                            .get();
-        } catch (IOException | InterruptedException | ExecutionException e) {
-            logger.error("Error reading hostname:", e);
-        }
-        if (hostname != null) {
-            String finalHostname = hostname;
-            // noinspection resource
-            withCreateContainerCmdModifier((cmd) -> cmd.withHostName(finalHostname));
-            // noinspection resource
-            withNetworkAliases(hostname);
-        }
     }
 
     public AccumuloContainer withGeoMesaDistributedRuntime() {

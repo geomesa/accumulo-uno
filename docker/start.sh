@@ -74,13 +74,13 @@ if [[ -n "$NAMENODE_PORT" ]] && [[ $NAMENODE_PORT != "8020" ]]; then
   sed -i "s/REPLACE_HOST:8020/$UNO_HOST:$NAMENODE_PORT/" "$UNO_HOME/install/hadoop/etc/hadoop/core-site.xml"
 fi
 if [[ -n "$DATANODE_PORT" ]] && [[ $DATANODE_PORT != "9866" ]]; then
-  setHadoopConf hdfs-site.xml dfs.datanode.address "0.0.0.0:$DATANODE_PORT"
+  setHadoopConf hdfs-site.xml dfs.datanode.address "$UNO_HOST:$DATANODE_PORT"
 fi
 if [[ -n "$DATANODE_IPC_PORT" ]] && [[ $DATANODE_IPC_PORT != "9867" ]]; then
-  setHadoopConf hdfs-site.xml dfs.datanode.ipc.address "0.0.0.0:$DATANODE_IPC_PORT"
+  setHadoopConf hdfs-site.xml dfs.datanode.ipc.address "$UNO_HOST:$DATANODE_IPC_PORT"
 fi
 if [[ -n "$JOURNALNODE_RPC_PORT" ]] && [[ $JOURNALNODE_RPC_PORT != "8485" ]]; then
-  setHadoopConf hdfs-site.xml dfs.journalnode.rpc-address "0.0.0.0:$JOURNALNODE_RPC_PORT"
+  setHadoopConf hdfs-site.xml dfs.journalnode.rpc-address "$UNO_HOST:$JOURNALNODE_RPC_PORT"
 fi
 if [[ -n "$YARN_RESOURCEMANAGER_SCHEDULER_PORT" ]] && [[ $YARN_RESOURCEMANAGER_SCHEDULER_PORT != "8030" ]]; then
   setHadoopConf yarn-site.xml yarn.resourcemanager.scheduler.address "$UNO_HOST:$YARN_RESOURCEMANAGER_SCHEDULER_PORT"
@@ -92,7 +92,7 @@ if [[ -n "$YARN_RESOURCEMANAGER_PORT" ]] && [[ $YARN_RESOURCEMANAGER_PORT != "80
   setHadoopConf yarn-site.xml yarn.resourcemanager.address "$UNO_HOST:$YARN_RESOURCEMANAGER_PORT"
 fi
 if [[ -n "$MAPRED_JOBHISTORY_PORT" ]] && [[ $MAPRED_JOBHISTORY_PORT != "10020" ]]; then
-  setHadoopConf mapred-site.xml mapreduce.jobhistory.address "0.0.0.0:$MAPRED_JOBHISTORY_PORT"
+  setHadoopConf mapred-site.xml mapreduce.jobhistory.address "$UNO_HOST:$MAPRED_JOBHISTORY_PORT"
 fi
 
 # make everything in hdfs world-writable for easier development
