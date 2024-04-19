@@ -3,7 +3,6 @@ package org.geomesa.testcontainers;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.OutputFrame;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
@@ -14,7 +13,7 @@ import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
 
 public class HadoopContainer
-      extends GenericContainer<HadoopContainer> {
+      extends UnoContainer<HadoopContainer> {
 
     private static final Logger logger = LoggerFactory.getLogger(HadoopContainer.class);
 
@@ -28,7 +27,7 @@ public class HadoopContainer
     private final int jobHistoryPort = getFreePort();
 
     public HadoopContainer() {
-        this(DockerImageName.parse("ghcr.io/geomesa/accumulo-uno").withTag("2.1"));
+        this(DEFAULT_IMAGE);
     }
 
     @SuppressWarnings("resource")
@@ -52,7 +51,9 @@ public class HadoopContainer
         addFixedExposedPort(resourceManagerPort, resourceManagerPort);
         addFixedExposedPort(jobHistoryPort, jobHistoryPort);
         addExposedPorts(8088, 9870);// resource manager UI, namenode UI
+        // noinspection resource
         waitingFor(Wait.forLogMessage(".*Running hadoop complete.*", 1));
+        // noinspection resource
         withLogConsumer(new HadoopLogConsumer());
     }
 
@@ -79,15 +80,15 @@ public class HadoopContainer
                "  </property>\n" +
                "  <property>\n" +
                "    <name>dfs.datanode.address</name>\n" +
-               "    <value>0.0.0.0:" + datanodePort + "</value>\n" +
+               "    <value>" + getHost() + ":" + datanodePort + "</value>\n" +
                "  </property>\n" +
                "  <property>\n" +
                "    <name>dfs.datanode.ipc.address</name>\n" +
-               "    <value>0.0.0.0:" + datanodeIpcPort + "</value>\n" +
+               "    <value>" + getHost() + ":" + datanodeIpcPort + "</value>\n" +
                "  </property>\n" +
                "  <property>\n" +
                "    <name>dfs.journalnode.rpc-address</name>\n" +
-               "    <value>0.0.0.0:" + journalnodeRpcPort + "</value>\n" +
+               "    <value>" + getHost() + ":" + journalnodeRpcPort + "</value>\n" +
                "  </property>\n" +
                "  <property>\n" +
                "    <name>yarn.resourcemanager.scheduler.address</name>\n" +
@@ -103,8 +104,13 @@ public class HadoopContainer
                "  </property>\n" +
                "  <property>\n" +
                "    <name>mapreduce.jobhistory.address</name>\n" +
-               "    <value>0.0.0.0:" + jobHistoryPort + "</value>\n" +
+               "    <value>" + getHost() + ":" + jobHistoryPort + "</value>\n" +
                "  </property>\n" +
+                "  <property>\n" +
+                // required to for networking outside the docker container
+                "    <name>dfs.client.use.datanode.hostname</name>\n" +
+                "    <value>true</value>\n" +
+                "  </property>\n" +
                "</configuration>";
     }
 

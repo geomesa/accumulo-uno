@@ -8,7 +8,6 @@ import org.apache.accumulo.core.conf.ClientProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.OutputFrame;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.utility.DockerImageName;
@@ -24,7 +23,7 @@ import java.nio.file.Paths;
 import java.util.Properties;
 
 public class AccumuloContainer
-      extends GenericContainer<AccumuloContainer> {
+      extends UnoContainer<AccumuloContainer> {
 
     private static final Logger logger = LoggerFactory.getLogger(AccumuloContainer.class);
 
@@ -34,17 +33,21 @@ public class AccumuloContainer
     private final int zookeeperPort = getFreePort();
 
     public AccumuloContainer() {
-        this(DockerImageName.parse("ghcr.io/geomesa/accumulo-uno").withTag("2.1"));
+        this(DEFAULT_IMAGE);
     }
 
     public AccumuloContainer(DockerImageName imageName) {
         super(imageName);
         int tserverPort = getFreePort();
+        int managerPort = getFreePort();
         addFixedExposedPort(zookeeperPort, zookeeperPort);
         addFixedExposedPort(tserverPort, tserverPort);
+        addFixedExposedPort(managerPort, managerPort);
         addExposedPorts(9995); // accumulo monitor, for debugging
         addEnv("ZOOKEEPER_PORT", Integer.toString(zookeeperPort));
         addEnv("TSERVER_PORT", Integer.toString(tserverPort));
+        addEnv("MANAGER_PORT", Integer.toString(managerPort));
+        // noinspection resource
         withLogConsumer(new AccumuloLogConsumer());
     }
 
@@ -53,7 +56,7 @@ public class AccumuloContainer
     }
 
     public AccumuloContainer withGeoMesaDistributedRuntime(String jarHostPath) {
-        logger.info("Binding to host path " + jarHostPath);
+        logger.info("Binding to host path {}", jarHostPath);
         return withFileSystemBind(jarHostPath,
                                   "/opt/fluo-uno/install/accumulo/lib/geomesa-accumulo-distributed-runtime.jar",
                                   BindMode.READ_ONLY);
@@ -105,7 +108,7 @@ public class AccumuloContainer
         try {
             URL url = AccumuloContainer.class.getClassLoader().getResource(DISTRIBUTED_RUNTIME_PROPS);
             URI uri = url == null ? null : url.toURI();
-            logger.debug("Distributed runtime lookup: " + uri);
+            logger.debug("Distributed runtime lookup: {}", uri);
             if (uri != null && uri.toString().endsWith("/target/classes/" + DISTRIBUTED_RUNTIME_PROPS)) {
                 // running through an IDE
                 File targetDir = Paths.get(uri).toFile().getParentFile().getParentFile();
