@@ -97,6 +97,8 @@ fi
 
 # make everything in hdfs world-writable for easier development
 setHadoopConf hdfs-site.xml dfs.permissions.enabled false
+# use hostname for client connections so that docker network resolves correctly - note that this needs to be set on the client...
+setHadoopConf hdfs-site.xml dfs.client.use.datanode.hostname true
 
 echo "Setting host to $UNO_HOST"
 grep -rl REPLACE_HOST "$UNO_HOME"/install/ | xargs sed -i "s/REPLACE_HOST/$UNO_HOST/g"
