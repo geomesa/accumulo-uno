@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.output.OutputFrame;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 
 import java.io.File;
@@ -47,6 +48,8 @@ public class AccumuloContainer
         addEnv("ZOOKEEPER_PORT", Integer.toString(zookeeperPort));
         addEnv("TSERVER_PORT", Integer.toString(tserverPort));
         addEnv("MANAGER_PORT", Integer.toString(managerPort));
+        // noinspection resource
+        waitingFor(Wait.forLogMessage(".*Running accumulo complete.*", 1));
         // noinspection resource
         withLogConsumer(new AccumuloLogConsumer());
     }
