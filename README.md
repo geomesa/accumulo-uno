@@ -39,14 +39,14 @@ Add the following dependencies:
     <dependency>
       <groupId>org.geomesa.testcontainers</groupId>
       <artifactId>testcontainers-accumulo</artifactId>
-      <version>1.0.0</version>
+      <version>1.4.1</version>
       <scope>test</scope>
     </dependency>
     <!-- only required for GeoMesa support -->
     <dependency>
       <groupId>org.locationtech.geomesa</groupId>
       <artifactId>geomesa-accumulo-distributed-runtime_2.12</artifactId>
-      <version>4.0.5</version>
+      <version>5.0.1</version>
       <scope>test</scope>
     </dependency>
 
