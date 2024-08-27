@@ -15,14 +15,17 @@
 
 FROM eclipse-temurin:11-jdk
 
-# head commit as of 02/21/2024
-ARG UNO_COMMIT=55dffa1017f2586fd0ab5468bded37bb1dd17d26
-ARG ACCUMULO_VERSION=2.1.2
+# head commit as of 08/27/2024
+ARG UNO_COMMIT=d987b9c369cfc6ad5fd15b14b26ac001f10d85ec
+ARG ACCUMULO_VERSION=2.1.3
+# note: hadoop 3.4 does not start up cleanly
+ARG HADOOP_VERSION=3.3.6
 
 ENV UNO_HOME=/opt/fluo-uno
 ENV UNO_SERVICE=accumulo
 ENV UNO_COMMAND=run
 ENV ACCUMULO_VERSION=${ACCUMULO_VERSION}
+ENV HADOOP_VERSION=${HADOOP_VERSION}
 ENV ACCUMULO_USE_NATIVE_MAP=true
 ENV HDFS_NAMENODE_USER=root
 ENV HDFS_DATANODE_USER=root
@@ -52,6 +55,9 @@ RUN cd "$UNO_HOME"/.. && \
     unzip fluo-uno.zip && \
     ln -s "fluo-uno-$UNO_COMMIT" fluo-uno && \
     cd fluo-uno && \
+    # add checksums for accumulo 2.1.3 and hadoop 3.4.0
+    echo "accumulo:2.1.3:1a27a144dc31f55ccc8e081b6c1bc6cc0362a8391838c53c166cb45291ff8f35867fd8e4729aa7b2c540f8b721f8c6953281bf589fc7fe320e4dc4d20b87abc4" >> "$UNO_HOME"/conf/checksums && \
+    echo "hadoop:3.4.0:6f653c0109f97430047bd3677c50da7c8a2809d153b231794cf980b3208a6b4beff8ff1a03a01094299d459a3a37a3fe16731629987165d71f328657dbf2f24c" >> "$UNO_HOME"/conf/checksums && \
     # this line removes the check for maven, which is only needed if you're building modules against source code
     sed -i '/hash mvn/d' bin/impl/commands.sh && \
     ./bin/uno fetch accumulo && \
@@ -64,7 +70,10 @@ RUN cd "$UNO_HOME"/.. && \
     rm downloads/* && \
     # remove some extra hadoop files that don't seem to be needed but take up a lot of disk
     rm -r install/hadoop/share/doc/ && \
-    rm -r install/hadoop/share/hadoop/tools/lib/
+    rm -r install/hadoop/share/hadoop/tools/lib/*aliyun* && \
+    rm -r install/hadoop/share/hadoop/tools/lib/*azure* && \
+    rm -r install/hadoop/share/hadoop/tools/lib/*kafka* && \
+    rm -r install/hadoop/share/hadoop/tools/lib/jdk.tools-*.jar
 
 COPY --chmod=777 start.sh /opt/start.sh
 
