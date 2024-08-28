@@ -17,7 +17,7 @@ FROM eclipse-temurin:11-jdk
 
 # head commit as of 08/27/2024
 ARG UNO_COMMIT=d987b9c369cfc6ad5fd15b14b26ac001f10d85ec
-ARG ACCUMULO_VERSION=2.1.3
+ARG ACCUMULO_VERSION=2.1.2
 # note: hadoop 3.4 does not start up cleanly
 ARG HADOOP_VERSION=3.3.6
 
