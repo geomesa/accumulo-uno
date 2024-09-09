@@ -78,7 +78,7 @@ Write unit tests against Accumulo:
 
 The docker currently uses:
 
-* Accumulo 2.1.2
+* Accumulo 2.1.3
 * Hadoop 3.3.6
 
 ## Ports
