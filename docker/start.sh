@@ -111,12 +111,10 @@ if [[ -n "$S3_VOLUME" ]]; then
   setAccumuloProperty general.custom.volume.preferred.default "${existingVolume}"
   setHadoopConf core-site.xml fs.s3a.connection.maximum 512
   setHadoopConf core-site.xml fs.s3a.path.style.access "${S3_PATH_STYLE_ACCESS:-true}"
-  if [[ -n "$AWS_ACCESS_KEY_ID" ]]; then
-    setHadoopConf core-site.xml fs.s3a.access.key "$AWS_ACCESS_KEY_ID"
-  fi
-  if [[ -n "$AWS_SECRET_ACCESS_KEY" ]]; then
-    setHadoopConf core-site.xml fs.s3a.secret.key "$AWS_SECRET_ACCESS_KEY"
-  fi
+  # use the aws provider chain for full authentication flexibility (note: does not consider fs.s3a.access/secret.key in core-site.xml)
+  setHadoopConf core-site.xml fs.s3a.aws.credentials.provider "com.amazonaws.auth.DefaultAWSCredentialsProviderChain"
+  # authentication provider mapping for compatibility with both aws sdk v1 and v2
+  setHadoopConf core-site.xml fs.s3a.aws.credentials.provider.mapping "com.amazonaws.auth.DefaultAWSCredentialsProviderChain=software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider"
   if [[ -n "$S3_ENDPOINT" ]]; then
     setHadoopConf core-site.xml fs.s3a.endpoint "$S3_ENDPOINT"
   fi
