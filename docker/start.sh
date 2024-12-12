@@ -9,6 +9,9 @@ UNO_SERVICE="${UNO_SERVICE:-accumulo}"
 UNO_COMMAND="${UNO_COMMAND:-run}"
 UNO_GRACEFUL_STOP="${UNO_GRACEFUL_STOP:-}"
 
+CONFIGURE_METADATA_VOLUME="false"
+existingVolume=""
+
 if ! pgrep -x sshd &>/dev/null; then
   /usr/sbin/sshd
 fi
@@ -106,9 +109,10 @@ setHadoopConf hdfs-site.xml dfs.client.use.datanode.hostname true
 # S3 support
 if [[ -n "$S3_VOLUME" ]]; then
   existingVolume="$(grep '^instance.volumes=' "$UNO_HOME"/install/accumulo/conf/accumulo.properties | sed 's/^instance.volumes=//')"
-  setAccumuloProperty instance.volumes "$existingVolume,${S3_VOLUME}"
-  setAccumuloProperty general.volume.chooser org.apache.accumulo.server.fs.PreferredVolumeChooser
+  setAccumuloProperty instance.volumes "${existingVolume},${S3_VOLUME}"
+  setAccumuloProperty general.volume.chooser org.apache.accumulo.core.spi.fs.PreferredVolumeChooser
   setAccumuloProperty general.custom.volume.preferred.default "${S3_VOLUME}"
+  setAccumuloProperty general.custom.volume.preferred.logger "${existingVolume}"
   setHadoopConf core-site.xml fs.s3a.connection.maximum 512
   setHadoopConf core-site.xml fs.s3a.path.style.access "${S3_PATH_STYLE_ACCESS:-true}"
   # use the aws provider chain for full authentication flexibility (note: does not consider fs.s3a.access/secret.key in core-site.xml)
@@ -144,6 +148,7 @@ if [[ "$UNO_COMMAND" == "add-volumes" ]]; then
   "$UNO_HOME"/bin/uno "start" "hadoop"
   "$UNO_HOME"/install/accumulo/bin/accumulo init --add-volumes
   export UNO_COMMAND="start"
+  CONFIGURE_METADATA_VOLUME="true"
 fi
 
 if [[ "$UNO_COMMAND" == "debug" ]]; then
@@ -151,6 +156,9 @@ if [[ "$UNO_COMMAND" == "debug" ]]; then
 elif ! "$UNO_HOME"/bin/uno "$UNO_COMMAND" "$UNO_SERVICE"; then
   cat "$UNO_HOME"/install/logs/setup/*
   exit 1
+fi
+if [[ "$CONFIGURE_METADATA_VOLUME" == "true" ]]; then
+  "$UNO_HOME"/bin/uno ashell -e "config -t accumulo.metadata -s table.custom.volume.preferred=${existingVolume/REPLACE_HOST/$UNO_HOST}"
 fi
 
 # handle stopping on kill signal
