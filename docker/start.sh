@@ -108,7 +108,7 @@ if [[ -n "$S3_VOLUME" ]]; then
   existingVolume="$(grep '^instance.volumes=' "$UNO_HOME"/install/accumulo/conf/accumulo.properties | sed 's/^instance.volumes=//')"
   setAccumuloProperty instance.volumes "$existingVolume,${S3_VOLUME}"
   setAccumuloProperty general.volume.chooser org.apache.accumulo.server.fs.PreferredVolumeChooser
-  setAccumuloProperty general.custom.volume.preferred.default "${existingVolume}"
+  setAccumuloProperty general.custom.volume.preferred.default "${S3_VOLUME}"
   setHadoopConf core-site.xml fs.s3a.connection.maximum 512
   setHadoopConf core-site.xml fs.s3a.path.style.access "${S3_PATH_STYLE_ACCESS:-true}"
   # use the aws provider chain for full authentication flexibility (note: does not consider fs.s3a.access/secret.key in core-site.xml)
