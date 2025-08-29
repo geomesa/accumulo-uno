@@ -15,9 +15,9 @@
 
 FROM eclipse-temurin:11-jdk
 
-# head commit as of 08/27/2024
-ARG UNO_COMMIT=d987b9c369cfc6ad5fd15b14b26ac001f10d85ec
-ARG ACCUMULO_VERSION=2.1.3
+# head commit as of 08/29/2025
+ARG UNO_COMMIT=cdaccba54a7c7b130b1ece3610ebe08a480ad425
+ARG ACCUMULO_VERSION=2.1.4
 # note: hadoop 3.4 does not start up cleanly
 ARG HADOOP_VERSION=3.3.6
 
@@ -51,22 +51,19 @@ RUN mkdir -p /root/.ssh && \
 
 # checkout a specific commit for repeatability, tip of main as of 2023-07-10
 RUN cd "$UNO_HOME"/.. && \
-    curl -L "https://github.com/apache/fluo-uno/archive/$UNO_COMMIT.zip" -o fluo-uno.zip && \
-    unzip fluo-uno.zip && \
-    ln -s "fluo-uno-$UNO_COMMIT" fluo-uno && \
+    curl -L "https://github.com/apache/accumulo-fluo-uno/archive/$UNO_COMMIT.zip" -o accumulo-fluo-uno.zip && \
+    unzip accumulo-fluo-uno.zip && \
+    ln -s "accumulo-fluo-uno-$UNO_COMMIT" fluo-uno && \
     cd fluo-uno && \
-    # add checksums for accumulo 2.1.3 and hadoop 3.4.0
-    echo "accumulo:2.1.3:1a27a144dc31f55ccc8e081b6c1bc6cc0362a8391838c53c166cb45291ff8f35867fd8e4729aa7b2c540f8b721f8c6953281bf589fc7fe320e4dc4d20b87abc4" >> "$UNO_HOME"/conf/checksums && \
-    echo "hadoop:3.4.0:6f653c0109f97430047bd3677c50da7c8a2809d153b231794cf980b3208a6b4beff8ff1a03a01094299d459a3a37a3fe16731629987165d71f328657dbf2f24c" >> "$UNO_HOME"/conf/checksums && \
     # this line removes the check for maven, which is only needed if you're building modules against source code
-    sed -i '/hash mvn/d' bin/impl/commands.sh && \
+    sed -i '/hash mvn/{N;N;N;d}' bin/impl/commands.sh && \
     ./bin/uno fetch accumulo && \
     UNO_HOST=REPLACE_HOST ./bin/uno install accumulo && \
     ln -s "$UNO_HOME"/install/hadoop-* "$UNO_HOME"/install/hadoop && \
     ln -s "$UNO_HOME"/install/accumulo-* "$UNO_HOME"/install/accumulo && \
     ln -s "$UNO_HOME"/install/apache-zookeeper-* "$UNO_HOME"/install/zookeeper && \
     # clean up downloaded artifacts to reduce image size
-    rm ../fluo-uno.zip && \
+    rm ../accumulo-fluo-uno.zip && \
     rm downloads/* && \
     # remove some extra hadoop files that don't seem to be needed but take up a lot of disk
     rm -r install/hadoop/share/doc/ && \
@@ -80,6 +77,3 @@ COPY --chmod=777 start.sh /opt/start.sh
 ENTRYPOINT [ "/opt/start.sh" ]
 
 WORKDIR $UNO_HOME
-
-RUN apt-get update && apt-get upgrade -y \
-    && rm -rf /var/lib/apt/lists/*
