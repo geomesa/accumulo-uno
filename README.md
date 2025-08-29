@@ -7,12 +7,12 @@ preserved, use the environment variable `UNO_GRACEFUL_STOP=true` to perform a gr
 
 ## Quick Start - Docker
 
-    docker pull ghcr.io/geomesa/accumulo-uno:2.1
+    docker pull ghcr.io/geomesa/accumulo-uno:2.1.4
     docker run --rm \
       --name accumulo \
       -p 2181:2181 -p 9997:9997 -p 9999:9999 \
       --hostname $(hostname -s) \
-      ghcr.io/geomesa/accumulo-uno:2.1
+      ghcr.io/geomesa/accumulo-uno:2.1.4
 
 Note that the `hostname` must be set to the hostname of the host in order for Accumulo's networking to work.
 
@@ -25,13 +25,13 @@ The Accumulo connection properties are available in the container:
 In order to use GeoMesa, the distributed runtime JAR must be mounted in to the container. The distributed runtime
 JAR is available from [GeoMesa](https://github.com/locationtech/geomesa/releases):
 
-    wget 'https://github.com/locationtech/geomesa/releases/download/geomesa-5.0.1/geomesa-accumulo_2.12-5.0.1-bin.tar.gz'
-    tar -xf geomesa-accumulo_2.12-5.0.1-bin.tar.gz
+    wget 'https://github.com/locationtech/geomesa/releases/download/geomesa-5.3.0/geomesa-accumulo_2.12-5.3.0-bin.tar.gz'
+    tar -xf geomesa-accumulo_2.12-5.3.0-bin.tar.gz
     docker run --rm \
       --name accumulo \
       -p 2181:2181 -p 9997:9997 -p 9999:9999 \
       --hostname $(hostname -s) \
-      -v "$(pwd)"/geomesa-accumulo_2.12-5.0.1/dist/accumulo/geomesa-accumulo-distributed-runtime_2.12-5.0.1.jar:/opt/fluo-uno/install/accumulo/lib/geomesa-accumulo-distributed-runtime.jar \
+      -v "$(pwd)"/geomesa-accumulo_2.12-5.3.0/dist/accumulo/geomesa-accumulo-distributed-runtime_2.12-5.3.0.jar:/opt/fluo-uno/install/accumulo/lib/geomesa-accumulo-distributed-runtime.jar \
       ghcr.io/geomesa/accumulo-uno:2.1
 
 ## Quick Start - Testcontainers
@@ -48,7 +48,7 @@ Add the following dependencies:
     <dependency>
       <groupId>org.locationtech.geomesa</groupId>
       <artifactId>geomesa-accumulo-distributed-runtime_2.12</artifactId>
-      <version>5.0.1</version>
+      <version>5.3.0</version>
       <scope>test</scope>
     </dependency>
 
@@ -135,7 +135,12 @@ The following environment variables are supported for storing data in S3:
 
 ## Tags and Versions
 
-### Tag `2.1`, `2.1.3`
+### Tag `2.1.4`
+
+* Accumulo 2.1.4
+* Hadoop 3.3.6
+
+### Tag `2.1.3`
 
 * Accumulo 2.1.3
 * Hadoop 3.3.6
