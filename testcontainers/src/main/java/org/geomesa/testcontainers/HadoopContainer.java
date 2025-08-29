@@ -64,10 +64,29 @@ public class HadoopContainer
         logger.info("The ResourceManager UI is available locally at: " + getHost() + ":" + getMappedPort(8088) + "/");
     }
 
+    /**
+     * Get the HDFS url used to connect to this instance
+     *
+     * @return the hdfs url
+     */
     public String getHdfsUrl() {
         return "hdfs://" + getHost() + ":" + namenodePort;
     }
 
+    /**
+     * Get the port that HDFS is listening on
+     *
+     * @return the port
+     */
+    public int getHdfsPort() {
+        return namenodePort;
+    }
+
+    /**
+     * Get the core-site.xml configuration for this cluster
+     *
+     * @return xml
+     */
     public String getConfigurationXml() {
         return "<configuration>\n" +
                "  <property>\n" +
