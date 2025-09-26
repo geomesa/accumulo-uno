@@ -13,7 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM eclipse-temurin:17-jdk
+ARG JAVA_VERSION=17
+FROM eclipse-temurin:${JAVA_VERSION}-jdk
 
 # head commit as of 08/29/2025
 ARG UNO_COMMIT=cdaccba54a7c7b130b1ece3610ebe08a480ad425
