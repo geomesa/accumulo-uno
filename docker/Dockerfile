@@ -34,6 +34,8 @@ ENV HDFS_SECONDARYNAMENODE_USER=root
 ENV YARN_RESOURCEMANAGER_USER=root
 ENV YARN_NODEMANAGER_USER=root
 
+ENV ACCUMULO_JAVA_OPTS=--add-opens=java.base/java.nio=org.apache.arrow.memory.core,ALL-UNNAMED
+
 RUN apt-get update && apt-get install -y \
     openssh-server \
     unzip \
