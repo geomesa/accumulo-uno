@@ -135,17 +135,26 @@ The following environment variables are supported for storing data in S3:
 
 ## Tags and Versions
 
+### Tag `2.1.4-jdk17`
+
+* Accumulo 2.1.4
+* Hadoop 3.3.6
+* Java 17
+
 ### Tag `2.1.4`
 
 * Accumulo 2.1.4
 * Hadoop 3.3.6
+* Java 11
 
 ### Tag `2.1.3`
 
 * Accumulo 2.1.3
 * Hadoop 3.3.6
+* Java 11
 
 ### Tag `2.1.2`
 
 * Accumulo 2.1.2
 * Hadoop 3.3.6
+* Java 11
