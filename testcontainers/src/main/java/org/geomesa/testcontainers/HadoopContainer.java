@@ -17,6 +17,22 @@ public class HadoopContainer
 
     private static final Logger logger = LoggerFactory.getLogger(HadoopContainer.class);
 
+    private static HadoopContainer INSTANCE;
+
+    public static synchronized HadoopContainer getInstance() {
+        if (INSTANCE == null) {
+            logger.info("Starting Hadoop container");
+            INSTANCE = new HadoopContainer();
+            INSTANCE.start();
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                logger.info("Stopping Hadoop container");
+                INSTANCE.stop();
+                logger.info("Stopped Hadoop container");
+            }));
+        }
+        return INSTANCE;
+    }
+
     private final int namenodePort = getFreePort();
     private final int datanodePort = getFreePort();
     private final int datanodeIpcPort = getFreePort();

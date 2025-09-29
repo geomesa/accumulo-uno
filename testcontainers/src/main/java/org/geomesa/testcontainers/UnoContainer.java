@@ -15,7 +15,9 @@ public class UnoContainer<T extends UnoContainer<T>> extends GenericContainer<T>
 
     private static final Logger logger = LoggerFactory.getLogger(UnoContainer.class);
 
-    static final DockerImageName DEFAULT_IMAGE = DockerImageName.parse("ghcr.io/geomesa/accumulo-uno").withTag("2.1.4-jdk17");
+    static final DockerImageName DEFAULT_IMAGE =
+            DockerImageName.parse("ghcr.io/geomesa/accumulo-uno")
+                    .withTag(System.getProperty("accumulo.docker.tag", "2.1.4-jdk17"));
 
     public UnoContainer(DockerImageName imageName) {
         super(imageName);

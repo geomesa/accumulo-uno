@@ -28,6 +28,22 @@ public class AccumuloContainer
 
     private static final Logger logger = LoggerFactory.getLogger(AccumuloContainer.class);
 
+    private static AccumuloContainer INSTANCE;
+
+    public static synchronized AccumuloContainer getInstance() {
+        if (INSTANCE == null) {
+            logger.info("Starting Accumulo container");
+            INSTANCE = new AccumuloContainer().withGeoMesaDistributedRuntime();
+            INSTANCE.start();
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                logger.info("Stopping Accumulo container");
+                INSTANCE.stop();
+                logger.info("Stopped Accumulo container");
+            }));
+        }
+        return INSTANCE;
+    }
+
     private final String instanceName = "uno";
     private final String username = "root";
     private final String password = "secret";
