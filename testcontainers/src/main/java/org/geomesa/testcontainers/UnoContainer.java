@@ -3,7 +3,6 @@ package org.geomesa.testcontainers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
@@ -15,7 +14,7 @@ public class UnoContainer<T extends UnoContainer<T>> extends GenericContainer<T>
 
     private static final Logger logger = LoggerFactory.getLogger(UnoContainer.class);
 
-    static final DockerImageName DEFAULT_IMAGE =
+    public static final DockerImageName DEFAULT_IMAGE =
             DockerImageName.parse("ghcr.io/geomesa/accumulo-uno")
                     .withTag(System.getProperty("accumulo.docker.tag", "2.1.4-jdk17"));
 
@@ -31,7 +30,7 @@ public class UnoContainer<T extends UnoContainer<T>> extends GenericContainer<T>
                             .onExit()
                             .thenApply((p) -> {
                                 try (InputStream is = p.getInputStream()) {
-                                    return IOUtils.toString(is, StandardCharsets.UTF_8).trim();
+                                    return new String(is.readAllBytes(), StandardCharsets.UTF_8).trim();
                                 } catch (IOException e) {
                                     logger.error("Error reading hostname:", e);
                                     return null;
