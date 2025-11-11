@@ -10,7 +10,7 @@
     <groupId>org.geomesa.testcontainers</groupId>
     <artifactId>testcontainers-accumulo</artifactId>
     <packaging>jar</packaging>
-    <version>1.5.1-SNAPSHOT</version>
+    <version>1.6.0</version>
 
     <licenses>
         <license>
@@ -302,7 +302,7 @@
         <connection>scm:git:git@github.com:geomesa/accumulo-uno.git</connection>
         <developerConnection>scm:git:git@github.com:geomesa/accumulo-uno.git</developerConnection>
         <url>https://github.com/geomesa/accumulo-uno</url>
-        <tag>HEAD</tag>
+        <tag>1.6.0</tag>
     </scm>
 
     <issueManagement>
